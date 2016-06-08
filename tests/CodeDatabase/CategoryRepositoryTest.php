@@ -2,8 +2,8 @@
 
 namespace Leoalmar\CodeDatabase\Tests;
 
-use Leoalmar\CodeDatabase\Stub\Models\Category;
-use Leoalmar\CodeDatabase\Stub\Repository\CategoryRepository;
+use Leoalmar\CodeDatabase\Models\Category;
+use Leoalmar\CodeDatabase\Repository\CategoryRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Mockery as M;
 

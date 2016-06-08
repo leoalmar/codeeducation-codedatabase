@@ -1,9 +1,9 @@
 <?php
 
-namespace Leoalmar\CodeDatabase\Stub\Repository;
+namespace Leoalmar\CodeDatabase\Repository;
 
 use Leoalmar\CodeDatabase\AbstractRepository;
-use Leoalmar\CodeDatabase\Stub\Models\Category;
+use Leoalmar\CodeDatabase\Models\Category;
 
 class CategoryRepository extends AbstractRepository
 {
@@ -39,6 +39,6 @@ class CategoryRepository extends AbstractRepository
 
     public function model()
     {
-        // TODO: Implement model() method.
+        return Category::class;
     }
 }

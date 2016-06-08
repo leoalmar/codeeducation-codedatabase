@@ -1,6 +1,6 @@
 <?php
 
-namespace Leoalmar\CodeDatabase\Stub\Models;
+namespace Leoalmar\CodeDatabase\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
