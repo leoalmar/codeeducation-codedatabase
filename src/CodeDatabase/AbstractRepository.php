@@ -2,15 +2,15 @@
 
 namespace Leoalmar\CodeDatabase;
 
+use Leoalmar\CodeDatabase\Contracts\CriteriaCollectionInterface;
+use Leoalmar\CodeDatabase\Contracts\CriteriaInterface;
 use Leoalmar\CodeDatabase\Contracts\RepositoryInterface;
 
-abstract class AbstractRepository implements RepositoryInterface
+abstract class AbstractRepository implements RepositoryInterface, CriteriaCollectionInterface
 {
-
-    /**
-     * @var \Illuminate\Database\Eloquent\Model
-     */
     protected $model;
+
+    protected $criteriaCollection = [];
 
     public function __construct()
     {
@@ -28,6 +28,7 @@ abstract class AbstractRepository implements RepositoryInterface
 
     public function all($columns = ['*'])
     {
+        $this->applyCriteria();
         return $this->model->get($columns);
     }
 
@@ -51,11 +52,37 @@ abstract class AbstractRepository implements RepositoryInterface
 
     public function find($id, $columns = ['*'])
     {
+        $this->applyCriteria();
         return $this->model->findOrFail($id,$columns);
     }
 
     public function findBy($field, $value, $columns = ['*'])
     {
         return $this->model->where($field,$value)->get($columns);
+    }
+
+    public function addCriteria(CriteriaInterface $criteria)
+    {
+        $this->criteriaCollection[] = $criteria;
+        return $this;
+    }
+
+    public function getCriteriaCollection()
+    {
+        return $this->criteriaCollection;
+    }
+
+    public function getByCriteria(CriteriaInterface $criteria)
+    {
+        $this->model = $criteria->apply($this->model,$this);
+        return $this;
+    }
+
+    public function applyCriteria()
+    {
+        foreach ($this->getCriteriaCollection() as $criteria) {
+            $this->model = $criteria->apply($this->model,$this);
+        }
+        return $this;
     }
 }
