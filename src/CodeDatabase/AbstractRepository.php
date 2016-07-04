@@ -12,6 +12,8 @@ abstract class AbstractRepository implements RepositoryInterface, CriteriaCollec
 
     protected $criteriaCollection = [];
 
+    protected $isIgnoreCriteria = false;
+
     public function __construct()
     {
         $this->makeModel();
@@ -58,6 +60,7 @@ abstract class AbstractRepository implements RepositoryInterface, CriteriaCollec
 
     public function findBy($field, $value, $columns = ['*'])
     {
+        $this->applyCriteria();
         return $this->model->where($field,$value)->get($columns);
     }
 
@@ -80,9 +83,26 @@ abstract class AbstractRepository implements RepositoryInterface, CriteriaCollec
 
     public function applyCriteria()
     {
+        if($this->isIgnoreCriteria){
+            return $this;
+        }
+        
         foreach ($this->getCriteriaCollection() as $criteria) {
             $this->model = $criteria->apply($this->model,$this);
         }
+        return $this;
+    }
+
+    public function ignoreCriteria($isIgnore = true)
+    {
+        $this->isIgnoreCriteria = $isIgnore;
+        return $this;
+    }
+
+    public function clearCriteria()
+    {
+        $this->criteriaCollection = [];
+        $this->makeModel();        
         return $this;
     }
 }

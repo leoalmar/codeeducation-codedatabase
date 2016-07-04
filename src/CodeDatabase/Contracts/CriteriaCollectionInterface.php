@@ -12,4 +12,8 @@ interface CriteriaCollectionInterface
     public function getByCriteria(CriteriaInterface $criteria);
 
     public function applyCriteria();
+
+    public function ignoreCriteria($isIgnore = true);
+    
+    public function clearCriteria();
 }

@@ -7,6 +7,7 @@ use Leoalmar\CodeDatabase\Contracts\CriteriaCollectionInterface;
 use Leoalmar\CodeDatabase\Contracts\CriteriaInterface;
 use Leoalmar\CodeDatabase\Criteria\FindByName;
 use Leoalmar\CodeDatabase\Criteria\FindByNameAndDescription;
+use Leoalmar\CodeDatabase\Criteria\OrderDescById;
 use Leoalmar\CodeDatabase\Criteria\OrderDescByName;
 use Leoalmar\CodeDatabase\Criteria\FindByDescription;
 use Leoalmar\CodeDatabase\Models\Category;
@@ -76,9 +77,10 @@ class CategoryRepositoryCriteriaTest extends AbstractTestCase
 
         $result = $repository->all();
 
-        $this->assertCount(2, $result);
+        $this->assertCount(3, $result);
         $this->assertEquals($result[0]->name, 'Category B');
-        $this->assertEquals($result[1]->name, 'Category A');
+        $this->assertEquals($result[1]->name, 'Category B');
+        $this->assertEquals($result[2]->name, 'Category A');
     }
 
     public function test_can_list_all_categories_with_criteria()
@@ -92,9 +94,10 @@ class CategoryRepositoryCriteriaTest extends AbstractTestCase
         
         $result = $this->repository->all();
 
-        $this->assertCount(2, $result);
+        $this->assertCount(3, $result);
         $this->assertEquals($result[0]->name, 'Category B');
-        $this->assertEquals($result[1]->name, 'Category A');
+        $this->assertEquals($result[1]->name, 'Category B');
+        $this->assertEquals($result[2]->name, 'Category A');
     }
 
     /**
@@ -125,8 +128,112 @@ class CategoryRepositoryCriteriaTest extends AbstractTestCase
         $this->assertEquals($result->name,"Category B");
     }
 
+    public function test_can_findby_categories_with_criteria()
+    {
+        $this->createCategoryDescription();
+
+        $criteria2 = new FindByName('Category B');
+        $criteria1 = new OrderDescById();
+
+        $this->repository
+            ->addCriteria($criteria1)
+            ->addCriteria($criteria2);
+
+        $result = $this->repository->findBy('description','Description');
+        $this->assertCount(2,$result);
+        $this->assertEquals($result[0]->id, 6);
+        $this->assertEquals($result[0]->name, 'Category B');
+        $this->assertEquals($result[1]->id, 5);
+        $this->assertEquals($result[1]->name, 'Category B');
+    }
+
+    public function test_can_ignore_criteria()
+    {
+        $reflectionClass = new \ReflectionClass($this->repository);
+        $reflectionProperty = $reflectionClass->getProperty('isIgnoreCriteria');
+        $reflectionProperty->setAccessible(true);
+        $result = $reflectionProperty->getValue($this->repository);
+        $this->assertFalse($result);
+
+        $this->repository->ignoreCriteria();
+        $result = $reflectionProperty->getValue($this->repository);
+        $this->assertTrue($result);
+
+        $this->repository->ignoreCriteria(false);
+        $result = $reflectionProperty->getValue($this->repository);
+        $this->assertFalse($result);
+
+        $this->assertInstanceOf(CategoryRepository::class,$this->repository->ignoreCriteria());
+
+    }
+
+    public function test_can_ignore_criteria_with_apply_criteria()
+    {
+
+        $this->createCategoryDescription();
+
+        $criteria1 = new FindByDescription('Description');
+        $criteria2 = new OrderDescByName();
+
+        $this->repository
+            ->addCriteria($criteria1)
+            ->addCriteria($criteria2)
+            ->ignoreCriteria()
+            ->applyCriteria();
+
+        $reflectionClass = new \ReflectionClass($this->repository);
+        $reflectionProperty = $reflectionClass->getProperty('model');
+        $reflectionProperty->setAccessible(true);
+        $result = $reflectionProperty->getValue($this->repository);
+
+        $this->assertInstanceOf(Category::class, $result);
+
+        
+        $this->repository->ignoreCriteria(false)->applyCriteria();
+        
+        $this->assertInstanceOf(CategoryRepository::class, $this->repository);
+
+        $result = $this->repository->all();
+
+        $this->assertCount(3, $result);
+        $this->assertEquals($result[0]->name, 'Category B');
+        $this->assertEquals($result[1]->name, 'Category B');
+        $this->assertEquals($result[2]->name, 'Category A');
+
+    }
+
+
+
+    public function test_can_clear_criterias()
+    {
+        $this->createCategoryDescription();
+
+        $criteria2 = new FindByName('Category B');
+        $criteria1 = new OrderDescById();
+
+        $this->repository
+            ->addCriteria($criteria1)
+            ->addCriteria($criteria2)
+            ->clearCriteria();
+
+        $this->assertInstanceOf(CategoryRepository::class, $this->repository->clearCriteria());
+        
+        $result = $this->repository->findBy('description','Description');
+        $this->assertCount(3,$result);
+
+
+        $reflectionClass = new \ReflectionClass($this->repository);
+        $reflectionProperty = $reflectionClass->getProperty('model');
+        $reflectionProperty->setAccessible(true);
+        $result = $reflectionProperty->getValue($this->repository);
+
+        $this->assertInstanceOf(Category::class, $result);
+    }
+
+
     private function createCategoryDescription(){
         Category::create(['name' => 'Category A','description' => 'Description']);
+        Category::create(['name' => 'Category B','description' => 'Description']);
         Category::create(['name' => 'Category B','description' => 'Description']);
     }
 
