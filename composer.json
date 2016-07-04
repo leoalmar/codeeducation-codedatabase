@@ -1,9 +1,16 @@
 {
   "name": "leoalmar/codeeducation-codedatabase",
-  "type": "library",
-  "description": "Academic Package",
-  "keywords": ["codedatabase"],
+  "description": "Repository Pattern library based in Laravel",
+  "authors":[
+    {
+      "name": "Leonardo Almeida Araújo",
+      "email": "leonardoxsystems@gmail.com"
+    }
+  ],
+  "homepage": "",
   "license": "MIT",
+  "type": "library",
+  "keywords": ["laravel", "repository","criteria"],
   "authors": [
     {
       "name": "leoalmar",
